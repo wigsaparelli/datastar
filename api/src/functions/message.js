@@ -11,7 +11,7 @@ app.http('message', {
                         'Unknown';
             context.log(`name: ${name}`);
             return {
-                status: 200, // default to 200
+                status: 200, // defaults to 200 anyway
                 jsonBody: { name, timestamp: Date.now().toLocaleString() }
             };
         } catch (err) {

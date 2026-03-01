@@ -5,19 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>Vanilla JavaScript App</title>
+    <title>Books App</title>
 </head>
 
 <body>
     <main>
-    <h1>Vanilla JavaScript App</h1>
-    <pre>Loading content from the API: <b id="name">...</b></pre>
+    <h1>Books App</h1>
+    <pre><b><u>Books:</u></b> <b id="all">...</b></pre>
+    <pre><b><u>Single book:</u></b> <b id="single">...</b></pre>
     </main>
 
     <script>
     (async function() {
-        const { name, timestamp } = await (await fetch(`/api/message`)).json();
-        document.querySelector('#name').textContent = `${name} [${timestamp}]`;
+        const all = await (await fetch(`/api/books`)).json();
+        document.querySelector('#all').textContent =
+          `\n\n${JSON.stringify(all, null, 2)}`;
+
+        const single = await (await fetch(`/api/books/2`)).json();
+        document.querySelector('#single').textContent =
+          `\n\n${JSON.stringify(single, null, 2)}`;
     }());
     </script>
 </body>
