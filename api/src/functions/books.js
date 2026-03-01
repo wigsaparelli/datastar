@@ -15,22 +15,15 @@ class HttpError extends Error {
     }
 }
 
-const books = new Map();
-books.set(1, {
-    id: 1,
-    title: 'The Enormous Crocodile',
-    author: 'Roald Dahl'
-});
-books.set(2, {
-    id: 2,
-    title: 'Harry Potter',
-    author: 'J.K. Rowling'
-});
+const books = new Map([
+    [1, { id: 1, title: 'The Enormous Crocodile', author: 'Roald Dahl' }],
+    [2, { id: 2, title: 'Harry Potter', author: 'J.K. Rowling' }]
+]);
 
 app.http('books', {
   route: 'books/{id?}',
   authLevel: 'anonymous',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
   handler: booksHandler,
 });
 
@@ -54,7 +47,7 @@ async function booksHandler(request, context) {
         return await handler(request);
     } catch (err) {
         if (err instanceof HttpError) {
-            // Expected so don't log
+            // Expected 4XX error handling, don't log it
             return {
                 status: Number(err.status),
                 jsonBody: {
@@ -62,7 +55,7 @@ async function booksHandler(request, context) {
                 }
             }; 
         } else {
-            // Unexpected so log the error
+            // Unexpected 500 error handling, log it
             context.error(`${err}`);
             return {
                 status: 500,
@@ -108,12 +101,12 @@ async function getBookOrBooks(request) {
 }
 
 async function createBook(request) {
-    const book = await request.json();
-    if (!book.title || !book.author) {
+    const body = await request.json();
+    if (!body.title || !body.author) {
         throw new HttpError(400, 'Title and Author are required fields');
     }
 
-    book.id = books.size + 1;
+    const book = { id: books.size + 1, ...body };
     books.set(book.id, book);
 
     return {
@@ -140,6 +133,7 @@ async function editBook(request) {
 
 async function deleteBook(request) {
     const book = await getBookById(request.params.id);
+    books.delete(book.id);
     return {
         status: 200,
         jsonBody: {
